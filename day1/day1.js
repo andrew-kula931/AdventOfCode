@@ -1,3 +1,6 @@
+//Requires pasting the input into the terminal when run
+//This is fixed on day7 when a file is read instead
+
 const readline = require('readline'); 
 const rl = readline.createInterface({ 
   input: process.stdin, 

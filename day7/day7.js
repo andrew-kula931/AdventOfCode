@@ -1,3 +1,5 @@
+//Can now read file by running: node [filename] [inputFilename]
+
 var fs = require("fs");
 
 let total = 0;
