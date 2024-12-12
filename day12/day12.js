@@ -23,7 +23,7 @@ function arraysEqual(arr1, arr2) {
     return true;
 }
 function findSides(region) {
-    region.north.sort(function (a, b) { return a[1] - b[1]; });
+    region.north.sort(function (a, b) { return (a[1] === b[1] ? a[0] - b[0] : a[1] - b[1]); });
     for (var i = 0; i < region.north.length - 1; i++) {
         if (region.north[i][1] == region.north[i + 1][1]) {
             if (region.north[i][0] == region.north[i + 1][0] + 1 ||
@@ -32,7 +32,7 @@ function findSides(region) {
             }
         }
     }
-    region.west.sort(function (a, b) { return a[0] - b[0]; });
+    region.west.sort(function (a, b) { return (a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]); });
     for (var i = 0; i < region.west.length - 1; i++) {
         if (region.west[i][0] == region.west[i + 1][0]) {
             if (region.west[i][1] == region.west[i + 1][1] + 1 ||
@@ -41,7 +41,7 @@ function findSides(region) {
             }
         }
     }
-    region.south.sort(function (a, b) { return a[1] - b[1]; });
+    region.south.sort(function (a, b) { return (a[1] === b[1] ? a[0] - b[0] : a[1] - b[1]); });
     for (var i = 0; i < region.south.length - 1; i++) {
         if (region.south[i][1] == region.south[i + 1][1]) {
             if (region.south[i][0] == region.south[i + 1][0] + 1 ||
@@ -50,7 +50,7 @@ function findSides(region) {
             }
         }
     }
-    region.east.sort(function (a, b) { return a[0] - b[0]; });
+    region.east.sort(function (a, b) { return (a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]); });
     for (var i = 0; i < region.east.length - 1; i++) {
         if (region.east[i][0] == region.east[i + 1][0]) {
             if (region.east[i][1] == region.east[i + 1][1] + 1 ||

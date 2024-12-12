@@ -36,7 +36,7 @@ function arraysEqual(arr1: number[], arr2: number[]): boolean {
 }
 
 function findSides(region: Region) {
-  region.north.sort((a, b) => a[1] - b[1]);
+  region.north.sort((a, b) => (a[1] === b[1] ? a[0] - b[0] : a[1] - b[1]));
   for (let i = 0; i < region.north.length - 1; i++) {
     if (region.north[i][1] == region.north[i + 1][1]) {
       if (
@@ -48,7 +48,7 @@ function findSides(region: Region) {
     }
   }
 
-  region.west.sort((a, b) => a[0] - b[0]);
+  region.west.sort((a, b) => (a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]));
   for (let i = 0; i < region.west.length - 1; i++) {
     if (region.west[i][0] == region.west[i + 1][0]) {
       if (
@@ -60,7 +60,7 @@ function findSides(region: Region) {
     }
   }
 
-  region.south.sort((a, b) => a[1] - b[1]);
+  region.south.sort((a, b) => (a[1] === b[1] ? a[0] - b[0] : a[1] - b[1]));
   for (let i = 0; i < region.south.length - 1; i++) {
     if (region.south[i][1] == region.south[i + 1][1]) {
       if (
@@ -72,7 +72,7 @@ function findSides(region: Region) {
     }
   }
 
-  region.east.sort((a, b) => a[0] - b[0]);
+  region.east.sort((a, b) => (a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]));
   for (let i = 0; i < region.east.length - 1; i++) {
     if (region.east[i][0] == region.east[i + 1][0]) {
       if (
