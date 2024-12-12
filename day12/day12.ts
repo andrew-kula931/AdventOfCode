@@ -36,36 +36,53 @@ function arraysEqual(arr1: number[], arr2: number[]): boolean {
 }
 
 function findSides(region: Region) {
+  region.north.sort((a, b) => a[1] - b[1]);
   for (let i = 0; i < region.north.length - 1; i++) {
-    if (region.north[i][1] != region.north[i + 1][1]) {
-      region.perimeter++;
+    if (region.north[i][1] == region.north[i + 1][1]) {
+      if (
+        region.north[i][0] == region.north[i + 1][0] + 1 ||
+        region.north[i][0] == region.north[i + 1][0] - 1
+      ) {
+        region.perimeter--;
+      }
     }
   }
-  region.perimeter++;
-  for (let i = 0; i < region.west.length - 1; i++) {
-    if (region.west[i][0] != region.west[i + 1][0]) {
-      region.perimeter++;
-    }
-  }
-  region.perimeter++;
-  for (let i = 0; i < region.south.length - 1; i++) {
-    if (region.south[i][1] != region.south[i + 1][1]) {
-      region.perimeter++;
-    }
-  }
-  region.perimeter++;
-  for (let i = 0; i < region.east.length - 1; i++) {
-    if (region.east[i][0] != region.east[i + 1][0]) {
-      region.perimeter++;
-    }
-  }
-  region.perimeter++;
 
-  console.log(region.perimeter);
-  console.log("North: " + region.north);
-  console.log("West: " + region.west);
-  console.log("South: " + region.south);
-  console.log("East: " + region.east);
+  region.west.sort((a, b) => a[0] - b[0]);
+  for (let i = 0; i < region.west.length - 1; i++) {
+    if (region.west[i][0] == region.west[i + 1][0]) {
+      if (
+        region.west[i][1] == region.west[i + 1][1] + 1 ||
+        region.west[i][1] == region.west[i + 1][1] - 1
+      ) {
+        region.perimeter--;
+      }
+    }
+  }
+
+  region.south.sort((a, b) => a[1] - b[1]);
+  for (let i = 0; i < region.south.length - 1; i++) {
+    if (region.south[i][1] == region.south[i + 1][1]) {
+      if (
+        region.south[i][0] == region.south[i + 1][0] + 1 ||
+        region.south[i][0] == region.south[i + 1][0] - 1
+      ) {
+        region.perimeter--;
+      }
+    }
+  }
+
+  region.east.sort((a, b) => a[0] - b[0]);
+  for (let i = 0; i < region.east.length - 1; i++) {
+    if (region.east[i][0] == region.east[i + 1][0]) {
+      if (
+        region.east[i][1] == region.east[i + 1][1] + 1 ||
+        region.east[i][1] == region.east[i + 1][1] - 1
+      ) {
+        region.perimeter--;
+      }
+    }
+  }
 
   return region.perimeter;
 }
@@ -84,7 +101,7 @@ function checkDirections(
   switch (directionNum) {
     case 1:
       if (y == 0) {
-        //region.perimeter++;
+        region.perimeter++;
         region.north.push([x, --y]);
         return checkDirections(
           locX,
@@ -99,7 +116,7 @@ function checkDirections(
       break;
     case 2:
       if (x == 0) {
-        //region.perimeter++;
+        region.perimeter++;
         region.west.push([--x, y]);
         return checkDirections(
           locX,
@@ -114,7 +131,7 @@ function checkDirections(
       break;
     case 3:
       if (y == grid.length - 1) {
-        //region.perimeter++;
+        region.perimeter++;
         region.south.push([x, ++y]);
         return checkDirections(
           locX,
@@ -129,7 +146,7 @@ function checkDirections(
       break;
     case 4:
       if (x == grid[y].length - 1) {
-        //region.perimeter++;
+        region.perimeter++;
         region.east.push([++x, y]);
         return checkDirections(
           locX,
@@ -144,7 +161,8 @@ function checkDirections(
       break;
     case 5:
       if (regionNum + 1 >= region.locations.length) {
-        total += findSides(region) * region.locations.length;
+        region.perimeter = findSides(region);
+        total += region.perimeter * region.locations.length;
         return;
       }
       regionNum++;
@@ -176,7 +194,7 @@ function checkDirections(
       regionNum
     );
   } else {
-    //region.perimeter++;
+    region.perimeter++;
     if (y < locY) {
       region.north.push([x, y]);
     } else if (y > locY) {
