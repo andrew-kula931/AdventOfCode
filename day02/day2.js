@@ -1,7 +1,8 @@
-const readline = require('readline'); 
-const rl = readline.createInterface({ 
-  input: process.stdin, 
-  output: process.stdout }); 
+const readline = require("readline");
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
 let count = 0;
 let growing = null;
@@ -9,9 +10,8 @@ let last = null;
 let dampenedIndex = null;
 let beforeCount = null;
 
-rl.on('line', function(input) { 
-  
-  if (input.toLowerCase() == 'done') {
+rl.on("line", function (input) {
+  if (input.toLowerCase() == "done") {
     console.log(count);
     rl.close();
   }
@@ -26,7 +26,6 @@ rl.on('line', function(input) {
       }
     }
   }
-
 });
 
 function runCheck(input) {
@@ -34,7 +33,7 @@ function runCheck(input) {
   last = null;
   dampenedIndex = null;
 
-  output = input.split(' ');
+  output = input.split(" ");
 
   for (let i = 0; i < output.length; i++) {
     if (i == 0) {
@@ -48,14 +47,14 @@ function runCheck(input) {
     }
 
     if (parseInt(output[i]) > parseInt(last)) {
-      if (growing == false || parseInt(output[i]) > (parseInt(last) + 3)) {
+      if (growing == false || parseInt(output[i]) > parseInt(last) + 3) {
         dampenedIndex = i;
         break;
-      } 
+      }
       last = output[i];
       growing = true;
     } else {
-      if (growing == true || parseInt(output[i]) < (parseInt(last) - 3)) {
+      if (growing == true || parseInt(output[i]) < parseInt(last) - 3) {
         dampenedIndex = i;
         break;
       }
@@ -70,8 +69,7 @@ function runCheck(input) {
 }
 
 function runDampenedCheck(input, dampenedIndex) {
-
-  output = input.split(' ');
+  output = input.split(" ");
   output.splice(dampenedIndex, 1);
 
   growing = null;
@@ -88,13 +86,13 @@ function runDampenedCheck(input, dampenedIndex) {
     }
 
     if (parseInt(output[i]) > parseInt(last)) {
-      if (growing == false || parseInt(output[i]) > (parseInt(last) + 3)) {
+      if (growing == false || parseInt(output[i]) > parseInt(last) + 3) {
         break;
-      } 
+      }
       last = output[i];
       growing = true;
     } else {
-      if (growing == true || parseInt(output[i]) < (parseInt(last) - 3)) {
+      if (growing == true || parseInt(output[i]) < parseInt(last) - 3) {
         break;
       }
       last = output[i];
