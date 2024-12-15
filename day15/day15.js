@@ -21,13 +21,12 @@ function move(fishX, fishY, direction) {
     switch (direction) {
         case "^":
             while (true) {
-                if (board[tempY - 1][fishX] == "[") {
+                if (board[tempY - 1][tempX] == "[") {
                     tempY--;
-                    if (board[tempY][tempX + 1] == "]" &&
-                        !changedSpots.locations1.some(function (arr) {
-                            return arr.every(function (value, index) { return value === [tempX + 1, tempY][index]; });
-                        })) {
-                        returnSpots.push([tempX + 1, tempY]);
+                    if (!changedSpots.locations2.some(function (arr) {
+                        return arr.every(function (value, index) { return value === [tempX + 1, tempY][index]; });
+                    })) {
+                        returnSpots.push([tempX + 1, tempY + 1]);
                     }
                     changing.locations1.push([tempX, tempY - 1]);
                     board[tempY][tempX] = ".";
@@ -35,13 +34,12 @@ function move(fishX, fishY, direction) {
                     moved = true;
                     continue;
                 }
-                else if (board[tempY - 1][fishX] == "]") {
+                else if (board[tempY - 1][tempX] == "]") {
                     tempY--;
-                    if (board[tempY][tempX - 1] == "[" &&
-                        !changedSpots.locations1.some(function (arr) {
-                            return arr.every(function (value, index) { return value === [tempX - 1, tempY][index]; });
-                        })) {
-                        returnSpots.push([tempX - 1, tempY]);
+                    if (!changedSpots.locations1.some(function (arr) {
+                        return arr.every(function (value, index) { return value === [tempX - 1, tempY][index]; });
+                    })) {
+                        returnSpots.push([tempX - 1, tempY + 1]);
                     }
                     changing.locations2.push([tempX, tempY - 1]);
                     board[tempY][tempX] = ".";
@@ -49,7 +47,7 @@ function move(fishX, fishY, direction) {
                     moved = true;
                     continue;
                 }
-                else if (board[tempY - 1][fishX] == "#") {
+                else if (board[tempY - 1][tempX] == "#") {
                     for (var _i = 0, _a = changedSpots.locations1; _i < _a.length; _i++) {
                         var spot = _a[_i];
                         board[spot[1]][spot[0]] = changedSpots.key1;
@@ -61,7 +59,6 @@ function move(fishX, fishY, direction) {
                     return fishPos;
                 }
                 else {
-                    console.log(returnSpots);
                     if (returnSpots.length != 0) {
                         tempX = returnSpots[0][0];
                         tempY = returnSpots[0][1];
@@ -115,13 +112,12 @@ function move(fishX, fishY, direction) {
             break;
         case "v":
             while (true) {
-                if (board[tempY + 1][fishX] == "[") {
+                if (board[tempY + 1][tempX] == "[") {
                     tempY++;
-                    if (board[tempY][tempX + 1] == "]" &&
-                        !changedSpots.locations1.some(function (arr) {
-                            return arr.every(function (value, index) { return value === [tempX + 1, tempY][index]; });
-                        })) {
-                        returnSpots.push([tempX + 1, tempY]);
+                    if (!changedSpots.locations2.some(function (arr) {
+                        return arr.every(function (value, index) { return value === [tempX + 1, tempY][index]; });
+                    })) {
+                        returnSpots.push([tempX + 1, tempY - 1]);
                     }
                     changing.locations1.push([tempX, tempY + 1]);
                     board[tempY][tempX] = ".";
@@ -129,13 +125,12 @@ function move(fishX, fishY, direction) {
                     moved = true;
                     continue;
                 }
-                else if (board[tempY + 1][fishX] == "]") {
+                else if (board[tempY + 1][tempX] == "]") {
                     tempY++;
-                    if (board[tempY][tempX - 1] == "[" &&
-                        !changedSpots.locations1.some(function (arr) {
-                            return arr.every(function (value, index) { return value === [tempX - 1, tempY][index]; });
-                        })) {
-                        returnSpots.push([tempX - 1, tempY]);
+                    if (!changedSpots.locations1.some(function (arr) {
+                        return arr.every(function (value, index) { return value === [tempX - 1, tempY][index]; });
+                    })) {
+                        returnSpots.push([tempX - 1, tempY - 1]);
                     }
                     changing.locations2.push([tempX, tempY + 1]);
                     board[tempY][tempX] = ".";
@@ -143,7 +138,7 @@ function move(fishX, fishY, direction) {
                     moved = true;
                     continue;
                 }
-                else if (board[tempY + 1][fishX] == "#") {
+                else if (board[tempY + 1][tempX] == "#") {
                     for (var _h = 0, _j = changedSpots.locations1; _h < _j.length; _h++) {
                         var spot = _j[_h];
                         board[spot[1]][spot[0]] = changedSpots.key1;
@@ -225,12 +220,14 @@ function part1(board, movement) {
         }
     }
     for (var m = 0; m < movement.length; m++) {
-        if (m > 20 && m < 40) {
-            board.forEach(function (x) {
-                console.log(x.join(""));
-            });
-            console.log(movement[m]);
+        /*
+        if (m > 180 && m < 210) {
+          board.forEach((x) => {
+            console.log(x.join(""));
+          });
+          console.log(movement[m]);
         }
+        */
         fish = move(fish.x, fish.y, movement[m]);
     }
     for (var y = 0; y < board.length; y++) {
@@ -274,11 +271,5 @@ lines.forEach(function (line) {
         movement = movement + line;
     }
 });
-board.forEach(function (x) {
-    console.log(x.join(""));
-});
 part1(board, movement);
-board.forEach(function (x) {
-    console.log(x.join(""));
-});
 console.log(total);

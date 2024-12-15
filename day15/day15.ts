@@ -35,37 +35,35 @@ function move(fishX: number, fishY: number, direction: string) {
   switch (direction) {
     case "^":
       while (true) {
-        if (board[tempY - 1][fishX] == "[") {
+        if (board[tempY - 1][tempX] == "[") {
           tempY--;
           if (
-            board[tempY][tempX + 1] == "]" &&
-            !changedSpots.locations1.some((arr) =>
+            !changedSpots.locations2.some((arr) =>
               arr.every((value, index) => value === [tempX + 1, tempY][index])
             )
           ) {
-            returnSpots.push([tempX + 1, tempY]);
+            returnSpots.push([tempX + 1, tempY + 1]);
           }
           changing.locations1.push([tempX, tempY - 1]);
           board[tempY][tempX] = ".";
           changedSpots.locations1.push([tempX, tempY]);
           moved = true;
           continue;
-        } else if (board[tempY - 1][fishX] == "]") {
+        } else if (board[tempY - 1][tempX] == "]") {
           tempY--;
           if (
-            board[tempY][tempX - 1] == "[" &&
             !changedSpots.locations1.some((arr) =>
               arr.every((value, index) => value === [tempX - 1, tempY][index])
             )
           ) {
-            returnSpots.push([tempX - 1, tempY]);
+            returnSpots.push([tempX - 1, tempY + 1]);
           }
           changing.locations2.push([tempX, tempY - 1]);
           board[tempY][tempX] = ".";
           changedSpots.locations2.push([tempX, tempY]);
           moved = true;
           continue;
-        } else if (board[tempY - 1][fishX] == "#") {
+        } else if (board[tempY - 1][tempX] == "#") {
           for (let spot of changedSpots.locations1) {
             board[spot[1]][spot[0]] = changedSpots.key1;
           }
@@ -74,7 +72,6 @@ function move(fishX: number, fishY: number, direction: string) {
           }
           return fishPos;
         } else {
-          console.log(returnSpots);
           if (returnSpots.length != 0) {
             tempX = returnSpots[0][0];
             tempY = returnSpots[0][1];
@@ -124,37 +121,35 @@ function move(fishX: number, fishY: number, direction: string) {
       break;
     case "v":
       while (true) {
-        if (board[tempY + 1][fishX] == "[") {
+        if (board[tempY + 1][tempX] == "[") {
           tempY++;
           if (
-            board[tempY][tempX + 1] == "]" &&
-            !changedSpots.locations1.some((arr) =>
+            !changedSpots.locations2.some((arr) =>
               arr.every((value, index) => value === [tempX + 1, tempY][index])
             )
           ) {
-            returnSpots.push([tempX + 1, tempY]);
+            returnSpots.push([tempX + 1, tempY - 1]);
           }
           changing.locations1.push([tempX, tempY + 1]);
           board[tempY][tempX] = ".";
           changedSpots.locations1.push([tempX, tempY]);
           moved = true;
           continue;
-        } else if (board[tempY + 1][fishX] == "]") {
+        } else if (board[tempY + 1][tempX] == "]") {
           tempY++;
           if (
-            board[tempY][tempX - 1] == "[" &&
             !changedSpots.locations1.some((arr) =>
               arr.every((value, index) => value === [tempX - 1, tempY][index])
             )
           ) {
-            returnSpots.push([tempX - 1, tempY]);
+            returnSpots.push([tempX - 1, tempY - 1]);
           }
           changing.locations2.push([tempX, tempY + 1]);
           board[tempY][tempX] = ".";
           changedSpots.locations2.push([tempX, tempY]);
           moved = true;
           continue;
-        } else if (board[tempY + 1][fishX] == "#") {
+        } else if (board[tempY + 1][tempX] == "#") {
           for (let spot of changedSpots.locations1) {
             board[spot[1]][spot[0]] = changedSpots.key1;
           }
@@ -231,12 +226,14 @@ function part1(board, movement) {
   }
 
   for (let m = 0; m < movement.length; m++) {
-    if (m > 20 && m < 40) {
+    /*
+    if (m > 180 && m < 210) {
       board.forEach((x) => {
         console.log(x.join(""));
       });
       console.log(movement[m]);
     }
+    */
     fish = move(fish.x, fish.y, movement[m]);
   }
 
@@ -283,11 +280,5 @@ lines.forEach(function (line) {
   }
 });
 
-board.forEach((x) => {
-  console.log(x.join(""));
-});
 part1(board, movement);
-board.forEach((x) => {
-  console.log(x.join(""));
-});
 console.log(total);
