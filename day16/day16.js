@@ -1,7 +1,7 @@
 var fs = require("fs");
 var total = 0;
 var failedPaths = [];
-var visitedLocations = [];
+var visitedLocations = new Map();
 var correctTotals = [];
 var Directions;
 (function (Directions) {
@@ -11,12 +11,12 @@ var Directions;
     Directions[Directions["RIGHT"] = 3] = "RIGHT";
     Directions[Directions["BLOCK"] = 4] = "BLOCK";
 })(Directions || (Directions = {}));
-function checkArray(x, y) {
-    return visitedLocations.some(function (arr) {
-        return arr.every(function (value, index) { return value === [x, y][index]; });
-    })
-        ? false
-        : true;
+function checkArray(x, y, direction) {
+    var key = "".concat(x, ",").concat(y);
+    if (visitedLocations.has(key)) {
+        return false;
+    }
+    return true;
 }
 function createEntry(total, direction, directions, x, y) {
     var newFailed = {
@@ -31,52 +31,65 @@ function checkDirections(direction, board, deerX, deerY) {
     var direct = [];
     switch (direction) {
         case Directions.UP:
-            if (board[deerY][deerX - 1] != "#" && checkArray(deerX - 1, deerY)) {
+            if (board[deerY][deerX - 1] != "#" &&
+                checkArray(deerX - 1, deerY, direction)) {
                 direct.push(Directions.LEFT);
             }
-            if (board[deerY][deerX + 1] != "#" && checkArray(deerX + 1, deerY)) {
+            if (board[deerY][deerX + 1] != "#" &&
+                checkArray(deerX + 1, deerY, direction)) {
                 direct.push(Directions.RIGHT);
             }
-            if (board[deerY - 1][deerX] != "#" && checkArray(deerX, deerY - 1)) {
+            if (board[deerY - 1][deerX] != "#" &&
+                checkArray(deerX, deerY - 1, direction)) {
                 direct.push(Directions.UP);
             }
             break;
         case Directions.LEFT:
-            if (board[deerY + 1][deerX] != "#" && checkArray(deerX, deerY + 1)) {
+            if (board[deerY + 1][deerX] != "#" &&
+                checkArray(deerX, deerY + 1, direction)) {
                 direct.push(Directions.DOWN);
             }
-            if (board[deerY - 1][deerX] != "#" && checkArray(deerX, deerY - 1)) {
+            if (board[deerY - 1][deerX] != "#" &&
+                checkArray(deerX, deerY - 1, direction)) {
                 direct.push(Directions.UP);
             }
-            if (board[deerY][deerX - 1] != "#" && checkArray(deerX - 1, deerY)) {
+            if (board[deerY][deerX - 1] != "#" &&
+                checkArray(deerX - 1, deerY, direction)) {
                 direct.push(Directions.LEFT);
             }
             break;
         case Directions.RIGHT:
-            if (board[deerY - 1][deerX] != "#" && checkArray(deerX, deerY - 1)) {
+            if (board[deerY - 1][deerX] != "#" &&
+                checkArray(deerX, deerY - 1, direction)) {
                 direct.push(Directions.UP);
             }
-            if (board[deerY + 1][deerX] != "#" && checkArray(deerX, deerY + 1)) {
+            if (board[deerY + 1][deerX] != "#" &&
+                checkArray(deerX, deerY + 1, direction)) {
                 direct.push(Directions.DOWN);
             }
-            if (board[deerY][deerX + 1] != "#" && checkArray(deerX + 1, deerY)) {
+            if (board[deerY][deerX + 1] != "#" &&
+                checkArray(deerX + 1, deerY, direction)) {
                 direct.push(Directions.RIGHT);
             }
             break;
         case Directions.DOWN:
-            if (board[deerY][deerX + 1] != "#" && checkArray(deerX + 1, deerY)) {
+            if (board[deerY][deerX + 1] != "#" &&
+                checkArray(deerX + 1, deerY, direction)) {
                 direct.push(Directions.RIGHT);
             }
-            if (board[deerY][deerX - 1] != "#" && checkArray(deerX - 1, deerY)) {
+            if (board[deerY][deerX - 1] != "#" &&
+                checkArray(deerX - 1, deerY, direction)) {
                 direct.push(Directions.LEFT);
             }
-            if (board[deerY + 1][deerX] != "#" && checkArray(deerX, deerY + 1)) {
+            if (board[deerY + 1][deerX] != "#" &&
+                checkArray(deerX, deerY + 1, direction)) {
                 direct.push(Directions.DOWN);
             }
             break;
     }
     if (direct.length > 1) {
         failedPaths.push(createEntry(total, direction, direct, deerX, deerY));
+        visitedLocations.set("".concat(deerX, ",").concat(deerY), direction);
         return direct[0];
     }
     else if (direct.length == 1) {
@@ -89,7 +102,6 @@ function part1(board) {
     var deerY = board.length - 2;
     var direction = Directions.RIGHT;
     while (true) {
-        visitedLocations.push([deerX, deerY]);
         console.log(deerX, deerY);
         var check = checkDirections(direction, board, deerX, deerY);
         total += check == direction ? 1 : 1000;
@@ -103,10 +115,14 @@ function part1(board) {
                 check = direction;
                 filteredFails[index].directions.shift();
                 total = filteredFails[index].total;
+                console.log("resetting total: ", total);
             }
             catch (e) {
                 break;
             }
+        }
+        else {
+            direction = check;
         }
         switch (check) {
             case Directions.UP:
@@ -148,6 +164,7 @@ lines.forEach(function (line) {
     board.push(line.split(""));
 });
 part1(board);
+console.log(correctTotals);
 for (var _i = 0, correctTotals_1 = correctTotals; _i < correctTotals_1.length; _i++) {
     var element = correctTotals_1[_i];
     if (element < total) {

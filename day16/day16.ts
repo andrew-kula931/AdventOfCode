@@ -2,7 +2,7 @@ var fs = require("fs");
 
 let total = 0;
 let failedPaths: Failed[] = [];
-let visitedLocations: number[][] = [];
+let visitedLocations: Map<string, Directions> = new Map();
 const correctTotals: number[] = [];
 
 enum Directions {
@@ -20,12 +20,12 @@ interface Failed {
   location: number[];
 }
 
-function checkArray(x, y) {
-  return visitedLocations.some((arr) =>
-    arr.every((value, index) => value === [x, y][index])
-  )
-    ? false
-    : true;
+function checkArray(x, y, direction: Directions) {
+  const key = `${x},${y}`;
+  if (visitedLocations.has(key)) {
+    return false;
+  }
+  return true;
 }
 
 function createEntry(
@@ -53,52 +53,89 @@ function checkDirections(
   let direct: Directions[] = [];
   switch (direction) {
     case Directions.UP:
-      if (board[deerY][deerX - 1] != "#" && checkArray(deerX - 1, deerY)) {
+      if (
+        board[deerY][deerX - 1] != "#" &&
+        checkArray(deerX - 1, deerY, direction)
+      ) {
         direct.push(Directions.LEFT);
       }
-      if (board[deerY][deerX + 1] != "#" && checkArray(deerX + 1, deerY)) {
+      if (
+        board[deerY][deerX + 1] != "#" &&
+        checkArray(deerX + 1, deerY, direction)
+      ) {
         direct.push(Directions.RIGHT);
       }
-      if (board[deerY - 1][deerX] != "#" && checkArray(deerX, deerY - 1)) {
+      if (
+        board[deerY - 1][deerX] != "#" &&
+        checkArray(deerX, deerY - 1, direction)
+      ) {
         direct.push(Directions.UP);
       }
       break;
     case Directions.LEFT:
-      if (board[deerY + 1][deerX] != "#" && checkArray(deerX, deerY + 1)) {
+      if (
+        board[deerY + 1][deerX] != "#" &&
+        checkArray(deerX, deerY + 1, direction)
+      ) {
         direct.push(Directions.DOWN);
       }
-      if (board[deerY - 1][deerX] != "#" && checkArray(deerX, deerY - 1)) {
+      if (
+        board[deerY - 1][deerX] != "#" &&
+        checkArray(deerX, deerY - 1, direction)
+      ) {
         direct.push(Directions.UP);
       }
-      if (board[deerY][deerX - 1] != "#" && checkArray(deerX - 1, deerY)) {
+      if (
+        board[deerY][deerX - 1] != "#" &&
+        checkArray(deerX - 1, deerY, direction)
+      ) {
         direct.push(Directions.LEFT);
       }
       break;
     case Directions.RIGHT:
-      if (board[deerY - 1][deerX] != "#" && checkArray(deerX, deerY - 1)) {
+      if (
+        board[deerY - 1][deerX] != "#" &&
+        checkArray(deerX, deerY - 1, direction)
+      ) {
         direct.push(Directions.UP);
       }
-      if (board[deerY + 1][deerX] != "#" && checkArray(deerX, deerY + 1)) {
+      if (
+        board[deerY + 1][deerX] != "#" &&
+        checkArray(deerX, deerY + 1, direction)
+      ) {
         direct.push(Directions.DOWN);
       }
-      if (board[deerY][deerX + 1] != "#" && checkArray(deerX + 1, deerY)) {
+      if (
+        board[deerY][deerX + 1] != "#" &&
+        checkArray(deerX + 1, deerY, direction)
+      ) {
         direct.push(Directions.RIGHT);
       }
       break;
     case Directions.DOWN:
-      if (board[deerY][deerX + 1] != "#" && checkArray(deerX + 1, deerY)) {
+      if (
+        board[deerY][deerX + 1] != "#" &&
+        checkArray(deerX + 1, deerY, direction)
+      ) {
         direct.push(Directions.RIGHT);
       }
-      if (board[deerY][deerX - 1] != "#" && checkArray(deerX - 1, deerY)) {
+      if (
+        board[deerY][deerX - 1] != "#" &&
+        checkArray(deerX - 1, deerY, direction)
+      ) {
         direct.push(Directions.LEFT);
       }
-      if (board[deerY + 1][deerX] != "#" && checkArray(deerX, deerY + 1)) {
+      if (
+        board[deerY + 1][deerX] != "#" &&
+        checkArray(deerX, deerY + 1, direction)
+      ) {
         direct.push(Directions.DOWN);
       }
       break;
   }
   if (direct.length > 1) {
     failedPaths.push(createEntry(total, direction, direct, deerX, deerY));
+    visitedLocations.set(`${deerX},${deerY}`, direction);
     return direct[0];
   } else if (direct.length == 1) {
     return direct[0];
@@ -111,7 +148,6 @@ function part1(board) {
   let deerY = board.length - 2;
   let direction: Directions = Directions.RIGHT;
   while (true) {
-    visitedLocations.push([deerX, deerY]);
     console.log(deerX, deerY);
     let check: Directions = checkDirections(direction, board, deerX, deerY);
     total += check == direction ? 1 : 1000;
@@ -125,9 +161,12 @@ function part1(board) {
         check = direction;
         filteredFails[index].directions.shift();
         total = filteredFails[index].total;
+        console.log("resetting total: ", total);
       } catch (e) {
         break;
       }
+    } else {
+      direction = check;
     }
     switch (check) {
       case Directions.UP:
@@ -173,7 +212,7 @@ lines.forEach(function (line) {
 });
 
 part1(board);
-
+console.log(correctTotals);
 for (let element of correctTotals) {
   if (element < total) {
     total = element;
