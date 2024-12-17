@@ -1,156 +1,70 @@
 var fs = require("fs");
 var total = 0;
-var failedPaths = [];
-var visitedLocations = new Map();
-var correctTotals = [];
-var Directions;
-(function (Directions) {
-    Directions[Directions["UP"] = 0] = "UP";
-    Directions[Directions["DOWN"] = 1] = "DOWN";
-    Directions[Directions["LEFT"] = 2] = "LEFT";
-    Directions[Directions["RIGHT"] = 3] = "RIGHT";
-    Directions[Directions["BLOCK"] = 4] = "BLOCK";
-})(Directions || (Directions = {}));
-function checkArray(x, y, direction) {
-    var key = "".concat(x, ",").concat(y);
-    if (visitedLocations.has(key)) {
-        return false;
+var scores = new Map();
+var Direction;
+(function (Direction) {
+    Direction[Direction["UP"] = 0] = "UP";
+    Direction[Direction["DOWN"] = 1] = "DOWN";
+    Direction[Direction["LEFT"] = 2] = "LEFT";
+    Direction[Direction["RIGHT"] = 3] = "RIGHT";
+})(Direction || (Direction = {}));
+function createKey(vector) {
+    return "".concat(vector.point.x, ",").concat(vector.point.y, ",").concat(vector.direction);
+}
+function dfs(board, point, target, direction, score) {
+    if (board[point.y][point.x] === "#") {
+        return;
     }
-    return true;
-}
-function createEntry(total, direction, directions, x, y) {
-    var newFailed = {
-        total: total,
-        direction: direction,
-        directions: directions,
-        location: [x, y],
-    };
-    return newFailed;
-}
-function checkDirections(direction, board, deerX, deerY) {
-    var direct = [];
+    var vector = { point: point, direction: direction };
+    var key = createKey(vector);
+    if (scores.has(vector) && scores.get(vector) >= score) {
+        return;
+    }
+    scores.set({ point: point, direction: direction }, score);
+    var forwardPosition = point;
+    var leftDirection;
+    var rightDirection;
     switch (direction) {
-        case Directions.UP:
-            if (board[deerY][deerX - 1] != "#" &&
-                checkArray(deerX - 1, deerY, direction)) {
-                direct.push(Directions.LEFT);
-            }
-            if (board[deerY][deerX + 1] != "#" &&
-                checkArray(deerX + 1, deerY, direction)) {
-                direct.push(Directions.RIGHT);
-            }
-            if (board[deerY - 1][deerX] != "#" &&
-                checkArray(deerX, deerY - 1, direction)) {
-                direct.push(Directions.UP);
-            }
+        case Direction.UP:
+            forwardPosition = { x: point.x, y: point.y - 1 };
+            leftDirection = Direction.LEFT;
+            rightDirection = Direction.RIGHT;
             break;
-        case Directions.LEFT:
-            if (board[deerY + 1][deerX] != "#" &&
-                checkArray(deerX, deerY + 1, direction)) {
-                direct.push(Directions.DOWN);
-            }
-            if (board[deerY - 1][deerX] != "#" &&
-                checkArray(deerX, deerY - 1, direction)) {
-                direct.push(Directions.UP);
-            }
-            if (board[deerY][deerX - 1] != "#" &&
-                checkArray(deerX - 1, deerY, direction)) {
-                direct.push(Directions.LEFT);
-            }
+        case Direction.DOWN:
+            forwardPosition = { x: point.x, y: point.y + 1 };
+            leftDirection = Direction.RIGHT;
+            rightDirection = Direction.LEFT;
             break;
-        case Directions.RIGHT:
-            if (board[deerY - 1][deerX] != "#" &&
-                checkArray(deerX, deerY - 1, direction)) {
-                direct.push(Directions.UP);
-            }
-            if (board[deerY + 1][deerX] != "#" &&
-                checkArray(deerX, deerY + 1, direction)) {
-                direct.push(Directions.DOWN);
-            }
-            if (board[deerY][deerX + 1] != "#" &&
-                checkArray(deerX + 1, deerY, direction)) {
-                direct.push(Directions.RIGHT);
-            }
+        case Direction.LEFT:
+            forwardPosition = { x: point.x - 1, y: point.y };
+            leftDirection = Direction.DOWN;
+            rightDirection = Direction.UP;
             break;
-        case Directions.DOWN:
-            if (board[deerY][deerX + 1] != "#" &&
-                checkArray(deerX + 1, deerY, direction)) {
-                direct.push(Directions.RIGHT);
-            }
-            if (board[deerY][deerX - 1] != "#" &&
-                checkArray(deerX - 1, deerY, direction)) {
-                direct.push(Directions.LEFT);
-            }
-            if (board[deerY + 1][deerX] != "#" &&
-                checkArray(deerX, deerY + 1, direction)) {
-                direct.push(Directions.DOWN);
-            }
+        case Direction.RIGHT:
+            forwardPosition = { x: point.x + 1, y: point.y };
+            leftDirection = Direction.UP;
+            rightDirection = Direction.DOWN;
             break;
     }
-    if (direct.length > 1) {
-        failedPaths.push(createEntry(total, direction, direct, deerX, deerY));
-        visitedLocations.set("".concat(deerX, ",").concat(deerY), direction);
-        return direct[0];
-    }
-    else if (direct.length == 1) {
-        return direct[0];
-    }
-    return Directions.BLOCK;
+    //Recursion
+    dfs(board, forwardPosition, target, direction, score + 1);
+    dfs(board, point, target, direction, score + 1);
+    dfs(board, point, target, direction, score + 1);
 }
-function part1(board) {
-    var deerX = 1;
-    var deerY = board.length - 2;
-    var direction = Directions.RIGHT;
-    while (true) {
-        console.log(deerX, deerY);
-        var check = checkDirections(direction, board, deerX, deerY);
-        total += check == direction ? 1 : 1000;
-        var filteredFails = failedPaths.filter(function (x) { return x.directions.length > 0; });
-        if (check == Directions.BLOCK) {
-            try {
-                var index = filteredFails.length - 1;
-                deerX = filteredFails[index].location[0];
-                deerY = filteredFails[index].location[1];
-                direction = filteredFails[index].directions[0];
-                check = direction;
-                filteredFails[index].directions.shift();
-                total = filteredFails[index].total;
-                console.log("resetting total: ", total);
-            }
-            catch (e) {
-                break;
-            }
-        }
-        else {
-            direction = check;
-        }
-        switch (check) {
-            case Directions.UP:
-                deerY--;
-                break;
-            case Directions.LEFT:
-                deerX--;
-                break;
-            case Directions.RIGHT:
-                deerX++;
-                break;
-            case Directions.DOWN:
-                deerY++;
-                break;
-            default:
-                console.log("Caught a block in the movment switch");
-        }
-        if (deerX == board[1].length - 2 && deerY == 1) {
-            correctTotals.push(total + 1);
-            console.log(correctTotals);
-        }
-        if (filteredFails.length != 0) {
-            continue;
-        }
-        if (deerX == board[1].length - 2 && deerY == 1) {
-            break;
+function part1(board, initial, target) {
+    dfs(board, initial, target, Direction.RIGHT, 0);
+    var best = Infinity;
+    var endScores = Array.from(scores.entries()).filter(function (_a) {
+        var state = _a[0], score = _a[1];
+        return state.point.x == target.x && state.point.y == target.y;
+    });
+    for (var _i = 0, endScores_1 = endScores; _i < endScores_1.length; _i++) {
+        var _a = endScores_1[_i], state = _a[0], score = _a[1];
+        if (best > score) {
+            best = score;
         }
     }
+    return best;
 }
 var filename = process.argv[2];
 if (!filename) {
@@ -163,12 +77,12 @@ var board = [];
 lines.forEach(function (line) {
     board.push(line.split(""));
 });
-part1(board);
-console.log(correctTotals);
-for (var _i = 0, correctTotals_1 = correctTotals; _i < correctTotals_1.length; _i++) {
-    var element = correctTotals_1[_i];
-    if (element < total) {
-        total = element;
-    }
-}
-console.log(total);
+var start = {
+    x: 1,
+    y: board.length - 2,
+};
+var end = {
+    x: board[1].length - 2,
+    y: 1,
+};
+console.log(part1(board, start, end));

@@ -1,200 +1,96 @@
 var fs = require("fs");
 
-let total = 0;
-let failedPaths: Failed[] = [];
-let visitedLocations: Map<string, Directions> = new Map();
-const correctTotals: number[] = [];
+interface Point {
+  x: number;
+  y: number;
+}
 
-enum Directions {
+interface Vector {
+  point: Point;
+  direction: Direction;
+}
+
+let total = 0;
+const scores: Map<Vector, number> = new Map();
+
+enum Direction {
   UP,
   DOWN,
   LEFT,
   RIGHT,
-  BLOCK,
 }
 
-interface Failed {
-  total: number;
-  direction: Directions;
-  directions: Directions[];
-  location: number[];
+function createKey(vector: Vector): string {
+  return `${vector.point.x},${vector.point.y},${vector.direction}`;
 }
 
-function checkArray(x, y, direction: Directions) {
-  const key = `${x},${y}`;
-  if (visitedLocations.has(key)) {
-    return false;
-  }
-  return true;
-}
-
-function createEntry(
-  total: number,
-  direction: Directions,
-  directions: Directions[],
-  x: number,
-  y: number
-) {
-  const newFailed: Failed = {
-    total: total,
-    direction: direction,
-    directions: directions,
-    location: [x, y],
-  };
-  return newFailed;
-}
-
-function checkDirections(
-  direction: Directions,
+function dfs(
   board,
-  deerX: number,
-  deerY: number
+  point: Point,
+  target: Point,
+  direction: Direction,
+  score: number
 ) {
-  let direct: Directions[] = [];
+  if (board[point.y][point.x] === "#") {
+    return;
+  }
+
+  let vector: Vector = { point, direction };
+
+  let key = createKey(vector);
+  if (scores.has(vector) && scores.get(vector)! >= score) {
+    return;
+  }
+
+  scores.set({ point, direction }, score);
+
+  let forwardPosition = point;
+  let leftDirection;
+  let rightDirection;
+
   switch (direction) {
-    case Directions.UP:
-      if (
-        board[deerY][deerX - 1] != "#" &&
-        checkArray(deerX - 1, deerY, direction)
-      ) {
-        direct.push(Directions.LEFT);
-      }
-      if (
-        board[deerY][deerX + 1] != "#" &&
-        checkArray(deerX + 1, deerY, direction)
-      ) {
-        direct.push(Directions.RIGHT);
-      }
-      if (
-        board[deerY - 1][deerX] != "#" &&
-        checkArray(deerX, deerY - 1, direction)
-      ) {
-        direct.push(Directions.UP);
-      }
+    case Direction.UP:
+      forwardPosition = { x: point.x, y: point.y - 1 };
+      leftDirection = Direction.LEFT;
+      rightDirection = Direction.RIGHT;
       break;
-    case Directions.LEFT:
-      if (
-        board[deerY + 1][deerX] != "#" &&
-        checkArray(deerX, deerY + 1, direction)
-      ) {
-        direct.push(Directions.DOWN);
-      }
-      if (
-        board[deerY - 1][deerX] != "#" &&
-        checkArray(deerX, deerY - 1, direction)
-      ) {
-        direct.push(Directions.UP);
-      }
-      if (
-        board[deerY][deerX - 1] != "#" &&
-        checkArray(deerX - 1, deerY, direction)
-      ) {
-        direct.push(Directions.LEFT);
-      }
+    case Direction.DOWN:
+      forwardPosition = { x: point.x, y: point.y + 1 };
+      leftDirection = Direction.RIGHT;
+      rightDirection = Direction.LEFT;
       break;
-    case Directions.RIGHT:
-      if (
-        board[deerY - 1][deerX] != "#" &&
-        checkArray(deerX, deerY - 1, direction)
-      ) {
-        direct.push(Directions.UP);
-      }
-      if (
-        board[deerY + 1][deerX] != "#" &&
-        checkArray(deerX, deerY + 1, direction)
-      ) {
-        direct.push(Directions.DOWN);
-      }
-      if (
-        board[deerY][deerX + 1] != "#" &&
-        checkArray(deerX + 1, deerY, direction)
-      ) {
-        direct.push(Directions.RIGHT);
-      }
+    case Direction.LEFT:
+      forwardPosition = { x: point.x - 1, y: point.y };
+      leftDirection = Direction.DOWN;
+      rightDirection = Direction.UP;
       break;
-    case Directions.DOWN:
-      if (
-        board[deerY][deerX + 1] != "#" &&
-        checkArray(deerX + 1, deerY, direction)
-      ) {
-        direct.push(Directions.RIGHT);
-      }
-      if (
-        board[deerY][deerX - 1] != "#" &&
-        checkArray(deerX - 1, deerY, direction)
-      ) {
-        direct.push(Directions.LEFT);
-      }
-      if (
-        board[deerY + 1][deerX] != "#" &&
-        checkArray(deerX, deerY + 1, direction)
-      ) {
-        direct.push(Directions.DOWN);
-      }
+    case Direction.RIGHT:
+      forwardPosition = { x: point.x + 1, y: point.y };
+      leftDirection = Direction.UP;
+      rightDirection = Direction.DOWN;
       break;
   }
-  if (direct.length > 1) {
-    failedPaths.push(createEntry(total, direction, direct, deerX, deerY));
-    visitedLocations.set(`${deerX},${deerY}`, direction);
-    return direct[0];
-  } else if (direct.length == 1) {
-    return direct[0];
-  }
-  return Directions.BLOCK;
+
+  //Recursion
+  dfs(board, forwardPosition, target, direction, score + 1);
+  dfs(board, point, target, direction, score + 1);
+  dfs(board, point, target, direction, score + 1);
 }
 
-function part1(board) {
-  let deerX = 1;
-  let deerY = board.length - 2;
-  let direction: Directions = Directions.RIGHT;
-  while (true) {
-    console.log(deerX, deerY);
-    let check: Directions = checkDirections(direction, board, deerX, deerY);
-    total += check == direction ? 1 : 1000;
-    let filteredFails = failedPaths.filter((x) => x.directions.length > 0);
-    if (check == Directions.BLOCK) {
-      try {
-        let index: number = filteredFails.length - 1;
-        deerX = filteredFails[index].location[0];
-        deerY = filteredFails[index].location[1];
-        direction = filteredFails[index].directions[0];
-        check = direction;
-        filteredFails[index].directions.shift();
-        total = filteredFails[index].total;
-        console.log("resetting total: ", total);
-      } catch (e) {
-        break;
-      }
-    } else {
-      direction = check;
-    }
-    switch (check) {
-      case Directions.UP:
-        deerY--;
-        break;
-      case Directions.LEFT:
-        deerX--;
-        break;
-      case Directions.RIGHT:
-        deerX++;
-        break;
-      case Directions.DOWN:
-        deerY++;
-        break;
-      default:
-        console.log("Caught a block in the movment switch");
-    }
-    if (deerX == board[1].length - 2 && deerY == 1) {
-      correctTotals.push(total + 1);
-      console.log(correctTotals);
-    }
-    if (filteredFails.length != 0) {
-      continue;
-    }
-    if (deerX == board[1].length - 2 && deerY == 1) {
-      break;
+function part1(board: string[][], initial: Point, target: Point) {
+  dfs(board, initial, target, Direction.RIGHT, 0);
+
+  let best = Infinity;
+  let endScores = Array.from(scores.entries()).filter(
+    ([state, score]) => state.point.x == target.x && state.point.y == target.y
+  );
+  for (let [state, score] of endScores) {
+    if (best > score) {
+      best = score;
     }
   }
+
+  return best;
 }
 
 var filename = process.argv[2];
@@ -211,11 +107,12 @@ lines.forEach(function (line) {
   board.push(line.split(""));
 });
 
-part1(board);
-console.log(correctTotals);
-for (let element of correctTotals) {
-  if (element < total) {
-    total = element;
-  }
-}
-console.log(total);
+const start: Point = {
+  x: 1,
+  y: board.length - 2,
+};
+const end: Point = {
+  x: board[1].length - 2,
+  y: 1,
+};
+console.log(part1(board, start, end));
