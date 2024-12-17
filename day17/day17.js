@@ -61,7 +61,7 @@ function adv(power) {
 }
 //Id 1
 function bxl(literal) {
-    var bitwise = b ^ literal;
+    var bitwise = (b ^ literal) >>> 0;
     b = bitwise;
 }
 //Id 2
@@ -77,12 +77,19 @@ function jnz(literal) {
 }
 //Id 4
 function bxc() {
-    var bitwise = b ^ c;
+    var bitwise = (b ^ c) >>> 0;
     b = bitwise;
+    console.log(b);
 }
 //Id 5
 function out(combo) {
     var returnList = (combo % 8).toString();
+    if (combo % 8 < 0) {
+        console.log("Found negative at: ", originA);
+        console.log(combo);
+        console.log(combo % 8);
+        process.exit(1);
+    }
     if (output.length != 0) {
         returnList = "," + returnList;
     }
@@ -90,11 +97,11 @@ function out(combo) {
 }
 //Id 6
 function bdv(power) {
-    b = a / Math.pow(2, power);
+    b = Math.trunc(a / Math.pow(2, power));
 }
 //Id 7
 function cdv(power) {
-    c = a / Math.pow(2, power);
+    c = Math.trunc(a / Math.pow(2, power));
 }
 function part1() {
     while (pointer < operationLine.length) {
@@ -108,7 +115,11 @@ function part1() {
 function part2() {
     while (pointer < operationLine.length) {
         var checkPointer = pointer;
+        console.log(operationLine[pointer], operationLine[pointer + 1]);
         run(Number(operationLine[pointer]), Number(operationLine[pointer + 1]));
+        console.log(a);
+        console.log("c ", c);
+        console.log("b ", b);
         if (pointer == checkPointer) {
             pointer += 2;
         }
@@ -142,10 +153,12 @@ lines.forEach(function (line) {
 });
 //part1();
 originA = 0;
+a = 0;
 var sameOutput = [];
 outerLoop: while (true) {
-    console.log("Origin:", originA, "output:", sameOutput);
     sameOutput = part2();
+    console.log("Origin:", originA, "output:", sameOutput);
+    console.log(operationLine);
     for (var i = 0; i < operationLine.length; i++) {
         if (sameOutput[i] !== operationLine[i]) {
             break;

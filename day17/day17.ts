@@ -66,7 +66,7 @@ function adv(power: number) {
 
 //Id 1
 function bxl(literal: number) {
-  let bitwise = b ^ literal;
+  let bitwise = (b ^ literal) >>> 0;
   b = bitwise;
 }
 
@@ -85,7 +85,7 @@ function jnz(literal: number) {
 
 //Id 4
 function bxc() {
-  let bitwise = b ^ c;
+  let bitwise = (b ^ c) >>> 0;
   b = bitwise;
 }
 
@@ -100,12 +100,12 @@ function out(combo: number) {
 
 //Id 6
 function bdv(power: number) {
-  b = a / Math.pow(2, power);
+  b = Math.trunc(a / Math.pow(2, power));
 }
 
 //Id 7
 function cdv(power: number) {
-  c = a / Math.pow(2, power);
+  c = Math.trunc(a / Math.pow(2, power));
 }
 
 function part1() {
@@ -154,11 +154,11 @@ lines.forEach(function (line) {
 });
 //part1();
 originA = 0;
+a = 0;
 let sameOutput: string[] = [];
 outerLoop: while (true) {
-  console.log("Origin:", originA, "output:", sameOutput);
-
   sameOutput = part2();
+
   for (let i = 0; i < operationLine.length; i++) {
     if (sameOutput[i] !== operationLine[i]) {
       break;
@@ -181,5 +181,4 @@ outerLoop: while (true) {
   }
 }
 
-console.log(sameOutput);
 console.log(originA);
