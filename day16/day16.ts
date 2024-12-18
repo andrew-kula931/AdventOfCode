@@ -12,6 +12,8 @@ interface Vector {
 
 let total = 0;
 const scores: Map<string, number> = new Map();
+const queue: string[] = [];
+const found: number[][] = [];
 
 enum Direction {
   UP,
@@ -77,6 +79,88 @@ function dfs(
   dfs(board, point, target, rightDirection, score + 1000);
 }
 
+function checkDirections(
+  x: number,
+  y: number,
+  direction: number,
+  best: number
+) {
+  switch (direction) {
+    case 0:
+      y--;
+    case 1:
+      y++;
+    case 2:
+      x--;
+    case 3:
+      x++;
+  }
+
+  let pos: string = `${x},${y},`;
+  scores.forEach((score, key) => {
+    if (key.startsWith(pos)) {
+      if (score == best - 1) {
+        found.push([x, y]);
+        queue.push(pos + direction);
+      }
+      if (score == best - 1000) {
+        found.push([x, y]);
+        queue.push(pos + direction);
+      }
+    }
+  });
+}
+
+function part2() {
+  let best = part1(board, start, end);
+  scores.forEach((score, key) => {
+    if (score === best) {
+      queue.push(key);
+    }
+  });
+
+  found.push([board[1].length - 2, 1]);
+
+  while (queue.length > 0) {
+    const top = queue[0];
+    const [x, y, dir] = top.split(",");
+    queue.shift();
+
+    const score = scores[top];
+
+    checkDirections(Number(x), Number(y), 0, score);
+    checkDirections(Number(x), Number(y), 1, score);
+    checkDirections(Number(x), Number(y), 2, score);
+    checkDirections(Number(x), Number(y), 3, score);
+
+    queue.shift();
+  }
+
+  const trueBoard: Boolean[][] = [];
+  for (let i = 0; i < board.length; i++) {
+    let row: Boolean[] = [];
+    for (let m = 0; m < board[i].length; m++) {
+      row.push(false);
+    }
+    trueBoard.push(row);
+  }
+
+  found.forEach(([x, y]) => {
+    trueBoard[y][x] = true;
+  });
+
+  let count = 0;
+  for (let i = 0; i < trueBoard.length; i++) {
+    for (let m = 0; m < trueBoard[i].length; m++) {
+      if (trueBoard[i][m]) {
+        count++;
+      }
+    }
+  }
+
+  return count;
+}
+
 function part1(board: string[][], initial: Point, target: Point) {
   dfs(board, initial, target, Direction.RIGHT, 0);
 
@@ -116,4 +200,4 @@ const end: Point = {
   x: board[1].length - 2,
   y: 1,
 };
-console.log(part1(board, start, end));
+console.log(part2());
