@@ -11,7 +11,7 @@ interface Vector {
 }
 
 let total = 0;
-const scores: Map<Vector, number> = new Map();
+const scores: Map<string, number> = new Map();
 
 enum Direction {
   UP,
@@ -36,15 +36,15 @@ function dfs(
   }
 
   let vector: Vector = { point, direction };
-
   let key = createKey(vector);
-  if (scores.has(vector) && scores.get(vector)! >= score) {
+
+  if (scores.has(key) && scores.get(key)! < score) {
     return;
   }
 
-  scores.set({ point, direction }, score);
+  scores.set(key, score);
 
-  let forwardPosition = point;
+  let forwardPosition = { ...point };
   let leftDirection;
   let rightDirection;
 
@@ -73,22 +73,23 @@ function dfs(
 
   //Recursion
   dfs(board, forwardPosition, target, direction, score + 1);
-  dfs(board, point, target, direction, score + 1);
-  dfs(board, point, target, direction, score + 1);
+  dfs(board, point, target, leftDirection, score + 1000);
+  dfs(board, point, target, rightDirection, score + 1000);
 }
 
 function part1(board: string[][], initial: Point, target: Point) {
   dfs(board, initial, target, Direction.RIGHT, 0);
 
+  const position = `${board[1].length - 2},${1},`;
+
   let best = Infinity;
-  let endScores = Array.from(scores.entries()).filter(
-    ([state, score]) => state.point.x == target.x && state.point.y == target.y
-  );
-  for (let [state, score] of endScores) {
-    if (best > score) {
-      best = score;
+  scores.forEach((score, key) => {
+    if (key.startsWith(position)) {
+      if (score < best) {
+        best = score;
+      }
     }
-  }
+  });
 
   return best;
 }

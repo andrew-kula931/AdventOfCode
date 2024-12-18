@@ -1,3 +1,14 @@
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var fs = require("fs");
 var total = 0;
 var scores = new Map();
@@ -17,11 +28,11 @@ function dfs(board, point, target, direction, score) {
     }
     var vector = { point: point, direction: direction };
     var key = createKey(vector);
-    if (scores.has(vector) && scores.get(vector) >= score) {
+    if (scores.has(key) && scores.get(key) < score) {
         return;
     }
-    scores.set({ point: point, direction: direction }, score);
-    var forwardPosition = point;
+    scores.set(key, score);
+    var forwardPosition = __assign({}, point);
     var leftDirection;
     var rightDirection;
     switch (direction) {
@@ -48,22 +59,20 @@ function dfs(board, point, target, direction, score) {
     }
     //Recursion
     dfs(board, forwardPosition, target, direction, score + 1);
-    dfs(board, point, target, direction, score + 1);
-    dfs(board, point, target, direction, score + 1);
+    dfs(board, point, target, leftDirection, score + 1000);
+    dfs(board, point, target, rightDirection, score + 1000);
 }
 function part1(board, initial, target) {
     dfs(board, initial, target, Direction.RIGHT, 0);
+    var position = "".concat(board[1].length - 2, ",").concat(1, ",");
     var best = Infinity;
-    var endScores = Array.from(scores.entries()).filter(function (_a) {
-        var state = _a[0], score = _a[1];
-        return state.point.x == target.x && state.point.y == target.y;
-    });
-    for (var _i = 0, endScores_1 = endScores; _i < endScores_1.length; _i++) {
-        var _a = endScores_1[_i], state = _a[0], score = _a[1];
-        if (best > score) {
-            best = score;
+    scores.forEach(function (score, key) {
+        if (key.startsWith(position)) {
+            if (score < best) {
+                best = score;
+            }
         }
-    }
+    });
     return best;
 }
 var filename = process.argv[2];
