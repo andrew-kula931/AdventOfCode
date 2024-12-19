@@ -17,20 +17,23 @@ var found = [];
 var Direction;
 (function (Direction) {
     Direction[Direction["UP"] = 0] = "UP";
-    Direction[Direction["DOWN"] = 1] = "DOWN";
-    Direction[Direction["LEFT"] = 2] = "LEFT";
-    Direction[Direction["RIGHT"] = 3] = "RIGHT";
+    Direction[Direction["RIGHT"] = 1] = "RIGHT";
+    Direction[Direction["DOWN"] = 2] = "DOWN";
+    Direction[Direction["LEFT"] = 3] = "LEFT";
 })(Direction || (Direction = {}));
 function createKey(vector) {
     return "".concat(vector.point.x, ",").concat(vector.point.y, ",").concat(vector.direction);
 }
 function dfs(board, point, target, direction, score) {
+    if (score > 99460) {
+        return;
+    }
     if (board[point.y][point.x] === "#") {
         return;
     }
     var vector = { point: point, direction: direction };
     var key = createKey(vector);
-    if (scores.has(key) && scores.get(key) < score) {
+    if (scores.has(key) && scores.get(key) <= score) {
         return;
     }
     scores.set(key, score);
@@ -64,31 +67,6 @@ function dfs(board, point, target, direction, score) {
     dfs(board, point, target, leftDirection, score + 1000);
     dfs(board, point, target, rightDirection, score + 1000);
 }
-function checkDirections(x, y, direction, best) {
-    switch (direction) {
-        case 0:
-            y--;
-        case 1:
-            y++;
-        case 2:
-            x--;
-        case 3:
-            x++;
-    }
-    var pos = "".concat(x, ",").concat(y, ",");
-    scores.forEach(function (score, key) {
-        if (key.startsWith(pos)) {
-            if (score == best - 1) {
-                found.push([x, y]);
-                queue.push(pos + direction);
-            }
-            if (score == best - 1000) {
-                found.push([x, y]);
-                queue.push(pos + direction);
-            }
-        }
-    });
-}
 function part2() {
     var best = part1(board, start, end);
     scores.forEach(function (score, key) {
@@ -96,17 +74,41 @@ function part2() {
             queue.push(key);
         }
     });
-    found.push([board[1].length - 2, 1]);
     while (queue.length > 0) {
         var top_1 = queue[0];
-        var _a = top_1.split(","), x = _a[0], y = _a[1], dir = _a[2];
         queue.shift();
-        var score = scores[top_1];
-        checkDirections(Number(x), Number(y), 0, score);
-        checkDirections(Number(x), Number(y), 1, score);
-        checkDirections(Number(x), Number(y), 2, score);
-        checkDirections(Number(x), Number(y), 3, score);
-        queue.shift();
+        var score = scores.get(top_1);
+        var _a = top_1.split(",").map(function (x) { return Number(x); }), x = _a[0], y = _a[1], dir = _a[2];
+        found.push([x, y]);
+        var left = (dir + 3) % 4;
+        var right = (dir + 1) % 4;
+        var forward;
+        switch (dir) {
+            case Direction.UP:
+                forward = "".concat(x, ",").concat(y + 1);
+                break;
+            case Direction.DOWN:
+                forward = "".concat(x, ",").concat(y - 1);
+                break;
+            case Direction.LEFT:
+                forward = "".concat(x + 1, ",").concat(y);
+                break;
+            case Direction.RIGHT:
+                forward = "".concat(x - 1, ",").concat(y);
+                break;
+        }
+        var leftKey = "".concat(x, ",").concat(y, ",").concat(left);
+        var rightKey = "".concat(x, ",").concat(y, ",").concat(right);
+        var forwardKey = "".concat(forward, ",").concat(dir);
+        if (scores.has(leftKey) && scores.get(leftKey) === score - 1000) {
+            queue.push(leftKey);
+        }
+        if (scores.has(rightKey) && scores.get(rightKey) === score - 1000) {
+            queue.push(rightKey);
+        }
+        if (scores.has(forwardKey) && scores.get(forwardKey) === score - 1) {
+            queue.push(forwardKey);
+        }
     }
     var trueBoard = [];
     for (var i = 0; i < board.length; i++) {
@@ -124,6 +126,7 @@ function part2() {
     for (var i = 0; i < trueBoard.length; i++) {
         for (var m = 0; m < trueBoard[i].length; m++) {
             if (trueBoard[i][m]) {
+                board[i][m] = "O";
                 count++;
             }
         }
@@ -163,3 +166,6 @@ var end = {
     y: 1,
 };
 console.log(part2());
+board.forEach(function (line) {
+    console.log(line.join(""));
+});

@@ -17,9 +17,9 @@ const found: number[][] = [];
 
 enum Direction {
   UP,
+  RIGHT,
   DOWN,
   LEFT,
-  RIGHT,
 }
 
 function createKey(vector: Vector): string {
@@ -33,14 +33,16 @@ function dfs(
   direction: Direction,
   score: number
 ) {
+  if (score > 99460) {
+    return;
+  }
   if (board[point.y][point.x] === "#") {
     return;
   }
-
   let vector: Vector = { point, direction };
   let key = createKey(vector);
 
-  if (scores.has(key) && scores.get(key)! < score) {
+  if (scores.has(key) && scores.get(key)! <= score) {
     return;
   }
 
@@ -79,38 +81,6 @@ function dfs(
   dfs(board, point, target, rightDirection, score + 1000);
 }
 
-function checkDirections(
-  x: number,
-  y: number,
-  direction: number,
-  best: number
-) {
-  switch (direction) {
-    case 0:
-      y--;
-    case 1:
-      y++;
-    case 2:
-      x--;
-    case 3:
-      x++;
-  }
-
-  let pos: string = `${x},${y},`;
-  scores.forEach((score, key) => {
-    if (key.startsWith(pos)) {
-      if (score == best - 1) {
-        found.push([x, y]);
-        queue.push(pos + direction);
-      }
-      if (score == best - 1000) {
-        found.push([x, y]);
-        queue.push(pos + direction);
-      }
-    }
-  });
-}
-
 function part2() {
   let best = part1(board, start, end);
   scores.forEach((score, key) => {
@@ -119,21 +89,47 @@ function part2() {
     }
   });
 
-  found.push([board[1].length - 2, 1]);
-
   while (queue.length > 0) {
     const top = queue[0];
-    const [x, y, dir] = top.split(",");
     queue.shift();
 
-    const score = scores[top];
+    const score = scores.get(top)!;
+    const [x, y, dir] = top.split(",").map((x) => Number(x));
 
-    checkDirections(Number(x), Number(y), 0, score);
-    checkDirections(Number(x), Number(y), 1, score);
-    checkDirections(Number(x), Number(y), 2, score);
-    checkDirections(Number(x), Number(y), 3, score);
+    found.push([x, y]);
 
-    queue.shift();
+    const left = (dir + 3) % 4;
+    const right = (dir + 1) % 4;
+
+    var forward;
+    switch (dir) {
+      case Direction.UP:
+        forward = `${x},${y + 1}`;
+        break;
+      case Direction.DOWN:
+        forward = `${x},${y - 1}`;
+        break;
+      case Direction.LEFT:
+        forward = `${x + 1},${y}`;
+        break;
+      case Direction.RIGHT:
+        forward = `${x - 1},${y}`;
+        break;
+    }
+
+    const leftKey = `${x},${y},${left}`;
+    const rightKey = `${x},${y},${right}`;
+    const forwardKey = `${forward},${dir}`;
+
+    if (scores.has(leftKey) && scores.get(leftKey)! === score - 1000) {
+      queue.push(leftKey);
+    }
+    if (scores.has(rightKey) && scores.get(rightKey)! === score - 1000) {
+      queue.push(rightKey);
+    }
+    if (scores.has(forwardKey) && scores.get(forwardKey)! === score - 1) {
+      queue.push(forwardKey);
+    }
   }
 
   const trueBoard: Boolean[][] = [];
@@ -153,6 +149,7 @@ function part2() {
   for (let i = 0; i < trueBoard.length; i++) {
     for (let m = 0; m < trueBoard[i].length; m++) {
       if (trueBoard[i][m]) {
+        board[i][m] = "O";
         count++;
       }
     }
@@ -201,3 +198,6 @@ const end: Point = {
   y: 1,
 };
 console.log(part2());
+board.forEach((line) => {
+  console.log(line.join(""));
+});
