@@ -41,29 +41,7 @@ function wallHopper(x, y, move) {
     }
     secondVisited.set("".concat(x, ",").concat(y), move);
     checked = [];
-    cheatCheck(x, y, move, 0);
-    /*
-    if (x > 1 && visited.has(`${x - 2},${y}`)) {
-      if (visited.get(`${x - 2},${y}`)! >= move + 102) {
-        total++;
-      }
-    }
-    if (x < board[0].length - 1 && visited.has(`${x + 2},${y}`)) {
-      if (visited.get(`${x + 2},${y}`)! >= move + 102) {
-        total++;
-      }
-    }
-    if (y > 1 && visited.has(`${x},${y - 2}`)) {
-      if (visited.get(`${x},${y - 2}`)! >= move + 102) {
-        total++;
-      }
-    }
-    if (y < board.length - 1 && visited.has(`${x},${y + 2}`)) {
-      if (visited.get(`${x},${y + 2}`)! >= move + 102) {
-        total++;
-      }
-    }
-  */
+    cheatCheck(x, y, move, 0, false);
     var upCoords = [x, y - 1];
     var leftCoords = [x - 1, y];
     var rightCoords = [x + 1, y];
@@ -74,30 +52,33 @@ function wallHopper(x, y, move) {
     wallHopper(leftCoords[0], leftCoords[1], move + 1);
     wallHopper(upCoords[0], upCoords[1], move + 1);
 }
-function cheatCheck(x, y, move, iteration) {
+function cheatCheck(x, y, move, iteration, hasCheated) {
     if (iteration > 6) {
         return;
     }
-    if (board[y][x] == "#") {
+    if (x == 0 || x == board[0].length - 1 || y == 0 || y == board.length - 1) {
         return;
     }
     if (checked.includes("".concat(x, ",").concat(y))) {
         return;
     }
     if (visited.has("".concat(x, ",").concat(y))) {
-        if (visited.get("".concat(x, ",").concat(y)) > move + 55) {
+        if (visited.get("".concat(x, ",").concat(y)) > move + 71) {
+            console.log(x, y);
             total++;
         }
     }
-    checked.push("".concat(x, ",").concat(y));
+    if (board[y][x] !== "#") {
+        checked.push("".concat(x, ",").concat(y));
+    }
     var upCoords = [x, y - 1];
     var leftCoords = [x - 1, y];
     var rightCoords = [x + 1, y];
     var downCoords = [x, y + 1];
-    cheatCheck(upCoords[0], upCoords[1], move + 1, iteration + 1);
-    cheatCheck(leftCoords[0], leftCoords[1], move + 1, iteration + 1);
-    cheatCheck(rightCoords[0], rightCoords[1], move + 1, iteration + 1);
-    cheatCheck(downCoords[0], downCoords[1], move + 1, iteration + 1);
+    cheatCheck(upCoords[0], upCoords[1], move + 1, iteration + 1, hasCheated);
+    cheatCheck(leftCoords[0], leftCoords[1], move + 1, iteration + 1, hasCheated);
+    cheatCheck(rightCoords[0], rightCoords[1], move + 1, iteration + 1, hasCheated);
+    cheatCheck(downCoords[0], downCoords[1], move + 1, iteration + 1, hasCheated);
 }
 var filename = process.argv[2];
 if (!filename) {
@@ -127,7 +108,6 @@ lines.forEach(function (line) {
     y++;
 });
 mapFinder(startX, startY, targetX, targetY, 0);
-console.log(moves);
 wallHopper(startX, startY, 0);
 console.log(total);
 //const totalMoves = moves;

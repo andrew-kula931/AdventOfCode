@@ -1,3 +1,6 @@
+//This program still needs to take into account the fact that
+//the pony can jump before or after the six count jump
+
 var fs = require("fs");
 
 let total = 0;
@@ -57,30 +60,7 @@ function wallHopper(x: number, y: number, move: number) {
 
   secondVisited.set(`${x},${y}`, move);
   checked = [];
-  cheatCheck(x, y, move, 0);
-
-  /*
-  if (x > 1 && visited.has(`${x - 2},${y}`)) {
-    if (visited.get(`${x - 2},${y}`)! >= move + 102) {
-      total++;
-    }
-  }
-  if (x < board[0].length - 1 && visited.has(`${x + 2},${y}`)) {
-    if (visited.get(`${x + 2},${y}`)! >= move + 102) {
-      total++;
-    }
-  }
-  if (y > 1 && visited.has(`${x},${y - 2}`)) {
-    if (visited.get(`${x},${y - 2}`)! >= move + 102) {
-      total++;
-    }
-  }
-  if (y < board.length - 1 && visited.has(`${x},${y + 2}`)) {
-    if (visited.get(`${x},${y + 2}`)! >= move + 102) {
-      total++;
-    }
-  }
-*/
+  cheatCheck(x, y, move, 0, false);
 
   let upCoords = [x, y - 1];
   let leftCoords = [x - 1, y];
@@ -94,12 +74,18 @@ function wallHopper(x: number, y: number, move: number) {
   wallHopper(upCoords[0], upCoords[1], move + 1);
 }
 
-function cheatCheck(x: number, y: number, move: number, iteration: number) {
+function cheatCheck(
+  x: number,
+  y: number,
+  move: number,
+  iteration: number,
+  hasCheated: boolean
+) {
   if (iteration > 6) {
     return;
   }
 
-  if (board[y][x] == "#") {
+  if (x == 0 || x == board[0].length - 1 || y == 0 || y == board.length - 1) {
     return;
   }
 
@@ -108,22 +94,31 @@ function cheatCheck(x: number, y: number, move: number, iteration: number) {
   }
 
   if (visited.has(`${x},${y}`)) {
-    if (visited.get(`${x},${y}`)! > move + 55) {
+    if (visited.get(`${x},${y}`)! > move + 71) {
+      console.log(x, y);
       total++;
     }
   }
 
-  checked.push(`${x},${y}`);
+  if (board[y][x] !== "#") {
+    checked.push(`${x},${y}`);
+  }
 
   let upCoords = [x, y - 1];
   let leftCoords = [x - 1, y];
   let rightCoords = [x + 1, y];
   let downCoords = [x, y + 1];
 
-  cheatCheck(upCoords[0], upCoords[1], move + 1, iteration + 1);
-  cheatCheck(leftCoords[0], leftCoords[1], move + 1, iteration + 1);
-  cheatCheck(rightCoords[0], rightCoords[1], move + 1, iteration + 1);
-  cheatCheck(downCoords[0], downCoords[1], move + 1, iteration + 1);
+  cheatCheck(upCoords[0], upCoords[1], move + 1, iteration + 1, hasCheated);
+  cheatCheck(leftCoords[0], leftCoords[1], move + 1, iteration + 1, hasCheated);
+  cheatCheck(
+    rightCoords[0],
+    rightCoords[1],
+    move + 1,
+    iteration + 1,
+    hasCheated
+  );
+  cheatCheck(downCoords[0], downCoords[1], move + 1, iteration + 1, hasCheated);
 }
 
 var filename = process.argv[2];
@@ -155,7 +150,6 @@ lines.forEach(function (line) {
 });
 
 mapFinder(startX, startY, targetX, targetY, 0);
-console.log(moves);
 wallHopper(startX, startY, 0);
 console.log(total);
 //const totalMoves = moves;
