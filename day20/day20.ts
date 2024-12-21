@@ -81,7 +81,7 @@ function cheatCheck(
   iteration: number,
   hasCheated: boolean
 ) {
-  if (iteration > 6) {
+  if (iteration > 7) {
     return;
   }
 

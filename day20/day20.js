@@ -1,3 +1,5 @@
+//This program still needs to take into account the fact that
+//the pony can jump before or after the six count jump
 var fs = require("fs");
 var total = 0;
 var moves = Infinity;
@@ -53,7 +55,7 @@ function wallHopper(x, y, move) {
     wallHopper(upCoords[0], upCoords[1], move + 1);
 }
 function cheatCheck(x, y, move, iteration, hasCheated) {
-    if (iteration > 6) {
+    if (iteration > 7) {
         return;
     }
     if (x == 0 || x == board[0].length - 1 || y == 0 || y == board.length - 1) {
