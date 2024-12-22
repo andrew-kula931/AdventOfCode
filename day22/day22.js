@@ -1,16 +1,22 @@
 var fs = require("fs");
 var total = 0;
 function mix(given, secret) {
-    return given ^ secret;
+    return (given ^ secret) >>> 0;
 }
 function prune(secret) {
     return secret % 16777216;
 }
-function createSecret(secret) {
+function createSecret(secret, iteration) {
     var stepOne = prune(mix(secret * 64, secret));
-    var stepTwo = prune(mix(Math.round(stepOne / 32), stepOne));
-    var stepThree = prune(mix(stepTwo * 2024, stepTwo));
-    return stepThree;
+    var stepTwo = prune(mix(Math.floor(stepOne / 32), stepOne));
+    var stepThree = prune(mix(stepTwo * 2048, stepTwo));
+    if (iteration < 1999) {
+        return createSecret(stepThree, iteration + 1);
+    }
+    else {
+        console.log(stepThree);
+        return stepThree;
+    }
 }
 var filename = process.argv[2];
 if (!filename) {
@@ -20,5 +26,6 @@ if (!filename) {
 var input = fs.readFileSync(filename, "utf-8");
 var lines = input.split("\r\n").filter(Boolean);
 lines.forEach(function (line) {
-    console.log(createSecret(Number(line)));
+    total += createSecret(Number(line), 0);
 });
+console.log(total);
