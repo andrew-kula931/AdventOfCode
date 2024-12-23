@@ -14,7 +14,6 @@ function createSecret(secret, iteration) {
         return createSecret(stepThree, iteration + 1);
     }
     else {
-        console.log(stepThree);
         return stepThree;
     }
 }
