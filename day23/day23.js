@@ -1,3 +1,12 @@
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 var fs = require("fs");
 function sortConnections() {
     var trios = [];
@@ -29,25 +38,51 @@ function sortConnections() {
 }
 function findPassword() {
     var finalList = [];
-    dependencies.forEach(function (value, key) {
-        if (value.length >= finalList.length) {
-            for (var _i = 0, value_2 = value; _i < value_2.length; _i++) {
-                var num = value_2[_i];
-                var connectedList = [];
-                var checking = dependencies.get(num);
-                for (var i = 0; i < dependencies.get(num).length; i++) {
-                    if (!value.includes(checking[i])) {
-                        continue;
-                    }
-                    connectedList.push(checking[i]);
-                }
-                if (connectedList.length > finalList.length) {
-                    finalList = connectedList;
+    var nodes = Array.from(dependencies.keys());
+    //Helper function to check if a subset form a clique
+    function isClique(subset) {
+        for (var i = 0; i < subset.length; i++) {
+            for (var j = i + 1; j < subset.length; j++) {
+                if (!dependencies.get(subset[i]).includes(subset[j])) {
+                    return false;
                 }
             }
         }
-    });
-    console.log(finalList);
+        return true;
+    }
+    function findClique(nodes) {
+        var adjList = new Map();
+        // Build adjacency list from dependencies
+        nodes.forEach(function (node) {
+            adjList.set(node, new Set(dependencies.get(node) || []));
+        });
+        function bronKerbosch(R, P, X) {
+            if (P.size === 0 && X.size === 0) {
+                if (R.size > finalList.length) {
+                    finalList = Array.from(R);
+                }
+                return;
+            }
+            var pivot = P.size ? P.values().next().value : X.values().next().value;
+            var pivotNeighbors = adjList.get(pivot) || new Set();
+            var _loop_1 = function (v) {
+                if (!pivotNeighbors.has(v)) {
+                    var neighbors_1 = adjList.get(v) || new Set();
+                    bronKerbosch(new Set(R).add(v), new Set(__spreadArray([], P, true).filter(function (x) { return neighbors_1.has(x); })), new Set(__spreadArray([], X, true).filter(function (x) { return neighbors_1.has(x); })));
+                    P.delete(v);
+                    X.add(v);
+                }
+            };
+            for (var _i = 0, P_1 = P; _i < P_1.length; _i++) {
+                var v = P_1[_i];
+                _loop_1(v);
+            }
+        }
+        bronKerbosch(new Set(), new Set(nodes), new Set());
+    }
+    findClique(nodes);
+    var sortedList = finalList.sort();
+    console.log(sortedList.join(","));
 }
 var filename = process.argv[2];
 if (!filename) {
