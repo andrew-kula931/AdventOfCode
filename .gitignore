@@ -160,4 +160,7 @@ dist
 .history
 .ionide
 
+# Get rid of input files
+input.txt
+
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,node

@@ -141,5 +141,5 @@ qhv XOR twk -> z31
 hgj XOR cqm -> z33
 
 
-Current Switches: cqm, mps, vjv, vwp, z19, z25
+Current Switches: cqm, mks, mps, vjv, vwp, z13, z19, z25
 */
