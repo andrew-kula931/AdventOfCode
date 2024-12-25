@@ -1,5 +1,4 @@
-//This program still needs to take into account the fact that
-//the pony can jump before or after the six count jump
+//The test input checks for the 20 jump not the six
 
 var fs = require("fs");
 
