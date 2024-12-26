@@ -1,5 +1,4 @@
-//This program still needs to take into account the fact that
-//the pony can jump before or after the six count jump
+//The test input checks for the 20 jump not the six
 var fs = require("fs");
 var total = 0;
 var moves = Infinity;
@@ -43,7 +42,7 @@ function wallHopper(x, y, move) {
     }
     secondVisited.set("".concat(x, ",").concat(y), move);
     checked = [];
-    cheatCheck(x, y, move, 0, false);
+    cheatCheck(x, y, move, 0);
     var upCoords = [x, y - 1];
     var leftCoords = [x - 1, y];
     var rightCoords = [x + 1, y];
@@ -54,8 +53,8 @@ function wallHopper(x, y, move) {
     wallHopper(leftCoords[0], leftCoords[1], move + 1);
     wallHopper(upCoords[0], upCoords[1], move + 1);
 }
-function cheatCheck(x, y, move, iteration, hasCheated) {
-    if (iteration > 7) {
+function cheatCheck(x, y, move, iteration) {
+    if (iteration > 20) {
         return;
     }
     if (x == 0 || x == board[0].length - 1 || y == 0 || y == board.length - 1) {
@@ -65,9 +64,11 @@ function cheatCheck(x, y, move, iteration, hasCheated) {
         return;
     }
     if (visited.has("".concat(x, ",").concat(y))) {
-        if (visited.get("".concat(x, ",").concat(y)) > move + 71) {
-            console.log(x, y);
+        if (visited.get("".concat(x, ",").concat(y)) > move + 100) {
             total++;
+            if (total % 1000 === 0) {
+                console.log(total);
+            }
         }
     }
     if (board[y][x] !== "#") {
@@ -77,10 +78,10 @@ function cheatCheck(x, y, move, iteration, hasCheated) {
     var leftCoords = [x - 1, y];
     var rightCoords = [x + 1, y];
     var downCoords = [x, y + 1];
-    cheatCheck(upCoords[0], upCoords[1], move + 1, iteration + 1, hasCheated);
-    cheatCheck(leftCoords[0], leftCoords[1], move + 1, iteration + 1, hasCheated);
-    cheatCheck(rightCoords[0], rightCoords[1], move + 1, iteration + 1, hasCheated);
-    cheatCheck(downCoords[0], downCoords[1], move + 1, iteration + 1, hasCheated);
+    cheatCheck(upCoords[0], upCoords[1], move + 1, iteration + 1);
+    cheatCheck(leftCoords[0], leftCoords[1], move + 1, iteration + 1);
+    cheatCheck(rightCoords[0], rightCoords[1], move + 1, iteration + 1);
+    cheatCheck(downCoords[0], downCoords[1], move + 1, iteration + 1);
 }
 var filename = process.argv[2];
 if (!filename) {

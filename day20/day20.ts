@@ -59,7 +59,7 @@ function wallHopper(x: number, y: number, move: number) {
 
   secondVisited.set(`${x},${y}`, move);
   checked = [];
-  cheatCheck(x, y, move, 0, false);
+  cheatCheck(x, y, move, 0);
 
   let upCoords = [x, y - 1];
   let leftCoords = [x - 1, y];
@@ -73,14 +73,8 @@ function wallHopper(x: number, y: number, move: number) {
   wallHopper(upCoords[0], upCoords[1], move + 1);
 }
 
-function cheatCheck(
-  x: number,
-  y: number,
-  move: number,
-  iteration: number,
-  hasCheated: boolean
-) {
-  if (iteration > 7) {
+function cheatCheck(x: number, y: number, move: number, iteration: number) {
+  if (iteration > 20) {
     return;
   }
 
@@ -93,9 +87,11 @@ function cheatCheck(
   }
 
   if (visited.has(`${x},${y}`)) {
-    if (visited.get(`${x},${y}`)! > move + 71) {
-      console.log(x, y);
+    if (visited.get(`${x},${y}`)! > move + 100) {
       total++;
+      if (total % 1000 === 0) {
+        console.log(total);
+      }
     }
   }
 
@@ -108,16 +104,10 @@ function cheatCheck(
   let rightCoords = [x + 1, y];
   let downCoords = [x, y + 1];
 
-  cheatCheck(upCoords[0], upCoords[1], move + 1, iteration + 1, hasCheated);
-  cheatCheck(leftCoords[0], leftCoords[1], move + 1, iteration + 1, hasCheated);
-  cheatCheck(
-    rightCoords[0],
-    rightCoords[1],
-    move + 1,
-    iteration + 1,
-    hasCheated
-  );
-  cheatCheck(downCoords[0], downCoords[1], move + 1, iteration + 1, hasCheated);
+  cheatCheck(upCoords[0], upCoords[1], move + 1, iteration + 1);
+  cheatCheck(leftCoords[0], leftCoords[1], move + 1, iteration + 1);
+  cheatCheck(rightCoords[0], rightCoords[1], move + 1, iteration + 1);
+  cheatCheck(downCoords[0], downCoords[1], move + 1, iteration + 1);
 }
 
 var filename = process.argv[2];
