@@ -36,10 +36,27 @@ wordMap = M.fromList
     , (T.pack "nine", T.pack "9")
     ]
 
-convertWords :: M.Map Text Text -> Text -> Text
-convertWords swap str = M.foldrWithKey replace str swap
+convertAll :: (Text -> (Text, Text)) -> Text -> Text
+-- _ is for when you don't want to specify what will be put there
+convertAll _ txt | T.null txt = T.empty
+convertAll f txt = 
+    let (result, rest) = f txt
+    -- <> is just a join or a union in some cases; it combines things together
+    in result <> convertAll f rest
+
+-- key `T.isPrefixOf` str === T.isPrefixOf key str
+--  ^- simply a different way of writing the same thing
+checkFirst :: M.Map Text Text -> Text -> (Text, Text)
+-- 'go' is a function defined within checkFirst
+-- Yes, functions can be created while defining another function
+--  ^- Think anonymous functions
+checkFirst swap str = go (M.toList swap)
     where
-        replace = T.replace
+        go [] = (T.take 1 str, T.drop 1 str)
+        go ((key, val):xs)
+            | key `T.isPrefixOf` str = (val, T.drop (T.length key) str)
+            | otherwise              = go xs
+
 
 findValue :: String -> Int
 findValue str = read (Prelude.head str : [Prelude.last str]) :: Int
@@ -48,10 +65,9 @@ main :: IO ()
 main = do
     contents <- readFile "test2.txt"
     let lst = Prelude.lines contents
-    print lst
 
     let packedLst = Prelude.map T.pack lst
-    let newLst = Prelude.map (convertWords wordMap) packedLst
+    let newLst = Prelude.map (convertAll (checkFirst wordMap)) packedLst
     let nums = Prelude.map (Prelude.filter isDigit . T.unpack) newLst
     let finalNums = Prelude.map findValue nums
     let total = sum finalNums
