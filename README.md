@@ -6,3 +6,7 @@ This is a collection of all the advent of code attempts I've done. Each year I u
 
 I used AoC as a challenge to learn the ever popular JavaScript.
 The solutions start off basic but get more organized and advanced as time goes by. I by no means am fluent in JavaScript but I can tell I made substantial progress over the course of the month.
+
+### 2023
+
+I was convinced to try out a functional programming language called Haskell. It was my first ever attempt with a functional language which really pushed my view of what it means to program and how I conceptualize concepts.
